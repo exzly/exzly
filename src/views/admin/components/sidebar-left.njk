@@ -1,0 +1,41 @@
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <a href="{{ webRoute() }}" class="brand-link text-center">
+    <span class="brand-text font-weight-light">{{ app_name }}</span>
+  </a>
+  <div class="sidebar">
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+      <div class="image">
+        <img src="/public/assets/adminLTE-3.2.0/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+      </div>
+      <div class="info">
+        <a href="{{ adminRoute('/account') }}" class="d-block">{{ req.user.fullName }}</a>
+      </div>
+    </div>
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <li class="nav-item">
+          <a href="{{ adminRoute() }}" class="nav-link {{ "active" if isBasePath }}">
+            <i class="nav-icon fas fa-home"></i>
+            <p>Home</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{{ adminRoute('/users') }}" class="nav-link {{ "active" if uriSegmentMatches('users') }}">
+            <i class="nav-icon fas fa-users"></i>
+            <p>Users</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{{ webRoute() }}" class="nav-link" target="_blank">
+            <i class="nav-icon fas fa-external-link-alt"></i>
+            <p>
+              Visit Front Page
+            </p>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</aside>

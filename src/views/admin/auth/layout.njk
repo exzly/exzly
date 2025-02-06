@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block page_title %}{% endblock page_title %}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet" href="/public/assets/adminLTE-3.2.0/plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="/public/assets/adminLTE-3.2.0/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <link rel="stylesheet" href="/public/assets/adminLTE-3.2.0/css/adminlte.min.css">
+  <link rel="stylesheet" href="/public/assets/sweetalert2/sweetalert2.min.css">
+</head>
+<body class="hold-transition login-page">
+{% block content %}{% endblock content %}
+</body>
+<script src="/public/assets/adminLTE-3.2.0/plugins/jquery/jquery.min.js"></script>
+<script src="/public/assets/adminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/public/assets/adminLTE-3.2.0/js/adminlte.min.js"></script>
+<script src="/public/assets/sweetalert2/sweetalert2.min.js"></script>
+<script src="/public/global.js"></script>
+{% block page_script %}{% endblock page_script %}
+</html>

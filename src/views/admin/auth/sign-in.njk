@@ -1,0 +1,93 @@
+{% extends "admin/auth/layout.njk" %}
+
+{% block page_title %}
+  Sign In | {{ app_name }}
+{% endblock page_title %}
+
+{% block content %}
+<div class="login-box">
+  <div class="card card-outline card-primary">
+    <div class="card-header text-center">
+      <a href="{{ webRoute() }}" class="h1"><b>{{ app_name }}</b></a>
+    </div>
+    <div class="card-body">
+      <form id="sign-in" class="my-2">
+        <div class="input-group mb-3">
+          <input id="identity" type="text" class="form-control" placeholder="Email / Username">
+          <div class="input-group-append">
+						<div class="input-group-text input-group-icon" style="max-width: 38px; justify-content: center; align-items: center;">
+							<span class="fas fa-user"></span>
+						</div>
+					</div>
+        </div>
+        <div class="input-group mb-3">
+          <input id="password" type="password" class="form-control" placeholder="Password" autocomplete="off">
+          <div class="input-group-append" style="cursor: pointer;" id="password-toggle">
+						<div class="input-group-text input-group-icon" style="max-width: 38px; justify-content: center; align-items: center;">
+							<span class="fas fa-eye-slash"></span>
+						</div>
+					</div>
+        </div>
+        <div class="row">
+					<div class="col-12">
+						<button type="submit" class="btn btn-primary btn-block">Sign in</button>
+					</div>
+				</div>
+      </form>
+      <p class="mb-1 px-1">
+        <a href="{{ webRoute() }}" class="float-left">Home</a>
+				<a href="{{ adminRoute('/forgot-password') }}" class="float-right">Forgot password</a>
+			</p>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block page_script %}
+<script type="text/javascript" nonce="{{ nonce }}">
+jQuery(() => {
+  $('#password-toggle').on('click', function(e) {
+    e.preventDefault();
+    showHidePassword(this)
+  });
+
+  $('form#sign-in').on('submit', (e) => {
+    e.preventDefault();
+    $('input').removeClass('is-invalid');
+    $('.error.invalid-feedback').remove();
+
+    setFormDisabled(true);
+
+    const identity = $('input#identity').val();
+    const password = $('input#password').val();
+
+    $.ajax({
+      url: '/api/auth/sign-in',
+      method: 'POST',
+      data: { identity, password },
+      success: (response) => {
+        setFormDisabled(false);
+        window.location.replace('{{ adminRoute() }}');
+      },
+      error: (error) => {
+        setFormDisabled(false);
+        if (error.responseJSON?.statusCode === 400) {
+          error.responseJSON.data.map((item) => {
+            const inputElement = $(`input#${item.path}`);
+            inputElement.addClass('is-invalid');
+            inputElement.closest('.input-group.mb-3').append(`<span class="error invalid-feedback">${item.message}</span>`);
+            return true;
+          });
+        }
+
+        SwalToast().fire({
+          icon: 'error',
+          title: 'Authentication failure',
+          text: error.responseJSON?.message || 'Please try again later',
+        });
+      }
+    });
+  });
+})
+</script>
+{% endblock page_script %}

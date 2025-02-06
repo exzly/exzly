@@ -1,0 +1,4 @@
+{
+  "exec": "node --experimental-modules --trace-warnings main.js",
+  "ignore": ["./database", "./storage", "./sessions", "./client", "./public", "./notes"]
+}

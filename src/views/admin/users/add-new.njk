@@ -1,0 +1,204 @@
+{% extends "admin/layout.njk" %}
+
+{% block page_title %}
+  New User | {{ app_name }}
+{% endblock page_title %}
+
+{% block content %}
+<div class="content-wrapper">
+  <!-- Page header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Add New User</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{{ adminRoute('/') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ adminRoute('/users') }}">Users</a></li>
+            <li class="breadcrumb-item active">Add New User</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Page header -->
+
+  <!-- Main content -->
+  <div class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <form class="card card-primary card-outline" id="add-new-user">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-12 col-lg-6">
+                  <div class="form-group">
+                    <label class="col-form-label" for="input-fullName">Full name</label>
+                    <input type="text" class="form-control form-control-border" id="input-fullName" placeholder="Enter ...">
+                  </div>
+                  <div class="form-group clearfix">
+                    <label>Gender</label>
+                    <div class="row" id="input-gender">
+                      <div class="col-12 mt-2">
+                        <div class="icheck-primary d-inline mx-2">
+                          <input type="radio" id="gender-male" name="gender" value="male">
+                          <label for="gender-male">Male</label>
+                        </div>
+                        <div class="icheck-primary d-inline mx-2">
+                          <input type="radio" id="gender-female" name="gender" value="female">
+                          <label for="gender-female">Female</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-lg-6">
+                  <div class="form-group">
+                    <label class="col-form-label" for="input-email">Email</label>
+                    <input type="text" class="form-control form-control-border" id="input-email" placeholder="Email">
+                  </div>
+                  <div class="form-group">
+                    <label class="col-form-label" for="input-username">Username</label>
+                    <input type="text" class="form-control form-control-border" id="input-username" placeholder="Username">
+                  </div>
+                  <div class="form-group password-form-group">
+                    <label>Password</label>
+                    <input type="password" class="form-control form-control-border" id="input-password" placeholder="Password" autocomplete="off"/>
+                    <div class="row mt-2 justify-content-between px-2">
+                      <a class="btn btn-xs btn-primary" password-option="generate">Generate random password</a>
+                      <a class="btn btn-xs btn-primary" password-option="show-hide">Show password</a>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      <input class="custom-control-input" type="checkbox" id="isAdmin">
+                      <label for="isAdmin" class="custom-control-label">Administrator</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="{{ adminRoute('/users') }}" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Go Back</a>
+              <button type="submit" class="btn btn-success float-right">Add New User</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Main content -->
+</div>
+{% endblock content %}
+
+{% block page_script %}
+<script type="text/javascript" nonce="{{ nonce }}">
+jQuery(() => {
+  /**
+   * Generate random password
+   *
+   * @param {number} length
+   * @returns {string}
+   */
+  const randomPassword = (length) => {
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let password = '';
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
+    }
+
+    return password;
+  };
+
+  $('form#add-new-user').on('submit', function(e) {
+    e.preventDefault();
+    setFormDisabled(true);
+
+    $('input').removeClass('is-invalid');
+    $('.error.invalid-feedback').remove();
+
+    const email = $('#input-email').val()
+    const username = $('#input-username').val()
+    const password = $('#input-password').val()
+    const isAdmin = $('#isAdmin').prop('checked');
+    const gender = $('input[name="gender"]').val();
+    const fullName = $('#input-fullName').val()
+
+    $.ajax({
+      url: '/api/users',
+      method: 'POST',
+      data: {
+        email,
+        username,
+        password,
+        isAdmin,
+        gender,
+        fullName,
+      },
+      success: (response) => {
+        setFormDisabled(false);
+        $(this)[0].reset();
+
+        Swal.fire({
+          title: `${response.fullName} has been added`,
+          showDenyButton: true,
+          showCancelButton: false,
+          confirmButtonText: 'Go back',
+          denyButtonText: 'Stay here',
+          customClass: {
+            confirmButton: 'btn btn-success',
+            denyButton: 'btn btn-primary',
+          },
+          icon: 'success',
+          text: `${response.fullName} has been added. Do you want to stay here?`,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.replace("{{ adminRoute('/users') }}");
+          }
+        });
+
+      },
+      error: (error) => {
+        setFormDisabled(false);
+        if (error.responseJSON?.statusCode === 400) {
+          error.responseJSON.data.map((item) => {
+            const inputElement = $(`#input-${item.path}`);
+
+            inputElement.addClass('is-invalid');
+            inputElement.parent().append(`<span class="error invalid-feedback">${item.message}</span>`);
+            return true;
+          });
+        }
+
+        SwalToast().fire({
+          icon: 'error',
+          title: 'Create new user failure',
+          text: error.responseJSON?.message || 'Please try again later',
+        });
+      }
+    });
+  });
+
+  $('a[password-option]').on('click', function click(e) {
+    e.preventDefault();
+
+    const passwordInput = $('#input-password');
+    const passwordOption = $(this).attr('password-option');
+
+    if (passwordOption === 'generate') {
+      passwordInput.val(randomPassword(10));
+    }
+
+    if (passwordOption === 'show-hide') {
+      showHidePassword(passwordInput);
+    }
+
+  });
+
+})
+</script>
+{% endblock page_script %}

@@ -1,0 +1,405 @@
+{% extends "admin/layout.njk" %}
+
+{% block page_title %}
+  Users | {{ app_name }}
+{% endblock page_title %}
+
+{% block page_style %}
+<link rel="stylesheet" href="/public/assets/DataTables/datatables.min.css">
+<link rel="stylesheet" href="/public/assets/Fancyapps/fancybox/fancybox.css">
+{% endblock page_style %}
+
+{% block content %}
+<div class="content-wrapper">
+  <!-- Page header -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Users</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{{ adminRoute() }}">Home</a></li>
+            <li class="breadcrumb-item active">Users</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Page header -->
+
+  <!-- Main content -->
+  <div class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card-header px-1">
+            <a href="{{ adminRoute('/users/add-new') }}" class="btn btn-sm btn-primary"><i class="fas fa-user-plus"></i> Add new</a>
+            <div class="card-tools">
+              {% if getQueryParams('in-trash') === 'true' %}
+              <a href="{{ adminRoute('/users') }}" class="btn btn-sm btn-warning">
+                <i class="fas fa-arrow-left"></i> Go back
+              </a>
+              {% else %}
+              <a href="{{ adminRoute('/users?in-trash=true') }}" class="btn btn-sm btn-warning">
+                <span class="badge bg-navy right" id="deleted-user-count">{{ deletedCount }}</span> Deleted
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-12 card py-3 px-3">
+          <table id="users-table" class="table table-bordered table-hover table-striped" style="width:100%">
+            <thead>
+              <th class="text-center">Seq</th>
+              <th>Username</th>
+              <th>Gender</th>
+              <th>Full name</th>
+              <th>Joined</th>
+              <th>Option</th>
+            </thead>
+            <tbody></tbody>
+            {# Uncomment this part to enable individual column searching #}
+            {# <tfoot>
+              <tr>
+                <th class="text-center">Seq</th>
+                <th>Username</th>
+                <th>Gender</th>
+                <th>Full name</th>
+                <th>Joined</th>
+                <th>Option</th>
+              </tr>
+          </tfoot> #}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Main content -->
+</div>
+{% endblock content %}
+
+{% block page_script %}
+<script src="/public/assets/moment/moment.min.js"></script>
+<script src="/public/assets/moment/moment-timezone-with-data.min.js"></script>
+<script src="/public/assets/DataTables/datatables.min.js"></script>
+<script src="/public/assets/Fancyapps/fancybox/fancybox.umd.js"></script>
+<script type="text/javascript" nonce="{{ nonce }}">
+jQuery(() => {
+  // Fancyapps
+  Fancybox.bind('[data-fancybox]');
+
+  /**
+   * Initialize DataTable
+   */
+  const usersTable = $('#users-table').DataTable({
+    fixedColumns: true,
+    stateSave: true,
+    responsive: true,
+    processing: true,
+    serverSide: true,
+    fixedHeader: true,
+    pagingType: 'full_numbers',
+    stateSaveCallback: (settings, data) => {
+      localStorage.setItem(`DataTables-${settings.sInstance}/in-trash/${getQueryParams('in-trash') === 'true'}`, JSON.stringify(data))
+    },
+    stateLoadCallback: (settings) => {
+      return JSON.parse(localStorage.getItem(`DataTables-${settings.sInstance}/in-trash/${getQueryParams('in-trash') === 'true'}`))
+    },
+    dom: '<"top"<"row"<"col-12 col-md-4 mb-2"l><"col-12 col-md-4 mb-2" B><"col-12 col-md-4 mb-2"f>>>t<"bottom"<"row"<"col-6 mt-3"i><"col-6 mt-3"p>>><"clear">',
+    ajax: {
+      url: '/api/users',
+      type: 'GET',
+      async: true,
+      dataSrc: 'data',
+      data: (data) => {
+        const customQuery = {
+          ...data,
+          skip: data.start,
+          size: data.length,
+        };
+
+        return Object.assign(customQuery, getQueryParams());
+      },
+    },
+    buttons: [],
+    columns: [
+      {
+        name: 'id',
+        data: (data, type, row, meta) => meta.row + 1,
+        width: '2%',
+        className: 'text-center',
+        searchable: false,
+      },
+      {
+        name: 'username',
+        data: 'username',
+        width: '24%',
+      },
+      {
+        name: 'gender',
+        data: 'gender',
+        width: '4%',
+        className: 'text-center',
+        searchable: false,
+        render: (data) => data === null ? '-' : ucfirst(data)
+      },
+      {
+        name: 'fullName',
+        data: 'fullName',
+        render: (data, type, row, meta) => {
+          return `<a class="${row.isAdmin ? 'text-bold text-green' : 'text-dark'}">${data}</a>`;
+        },
+      },
+      {
+        name: 'createdAt',
+        data: 'createdAt',
+        width: '14%',
+        searchable: false,
+        render: (data) => moment.tz(data, getTimezone()).tz(moment.tz.guess()).fromNow()
+      },
+      {
+        name: 'id',
+        data: 'id',
+        className: 'text-center',
+        orderable: false,
+        searchable: false,
+        render: (data, type, row, meta) => {
+          if (getQueryParams('in-trash') === 'true') {
+            return `
+              <a class="btn btn-xs bg-primary" row-id="${meta.row}" row-option="overview"><i class="fas fa-eye"></i></a>
+              <a class="btn btn-xs btn-info" row-id="${meta.row}" row-option="restore"><i class="fas fa-recycle"></i></a>
+              <a class="btn btn-xs btn-danger" row-id="${meta.row}" row-option="force-delete"><i class="fas fa-trash"></i></a>
+            `;
+          }
+
+          return `
+            <a class="btn btn-xs bg-primary" row-id="${meta.row}" row-option="overview"><i class="fas fa-eye"></i></a>
+            <a href="{{ adminRoute('/users/profile/${data}/edit') }}" class="btn btn-xs bg-info"><i class="fas fa-edit"></i></a>
+            <a class="btn btn-xs bg-danger" row-id="${meta.row}" row-option="delete"><i class="fas fa-trash"></i></a>
+          `;
+        },
+      },
+    ],
+    drawCallback: function() {
+      const api = this.api();
+      $('a[row-option]').on('click', function () {
+        const row = $(this).attr('row-id');
+        const data = api.row(row).data();
+        const option = $(this).attr('row-option');
+      
+        if (option === 'overview') {
+          handleOverviewData(row, api.row(row).data())
+        } else if (option === 'delete') {
+          handleDeleteData(row, data);
+        } else if (option === 'force-delete') {
+          handleDeleteData(row, data, true);
+        } else if (option === 'restore') {
+          handleRestoreData(row, data);
+        }
+      });
+
+      $(document).on('click', '#delete-user', function (e) {
+        e.preventDefault();
+        const rowId = $(this).attr('row-id');
+        $('.modal-backdrop').remove();
+        $('.widget-user-modal').modal('hide').remove();
+        handleDeleteData(rowId, api.row(rowId).data(), getQueryParams('in-trash') === 'true');
+      });
+    },
+    // Uncomment this part to enable individual column searching
+    // initComplete: function () {
+    //   this.api()
+    //   .columns()
+    //   .every(function () {
+    //       let column = this;
+    //       let title = column.footer().textContent;
+
+    //       // Create input element
+    //       let input = document.createElement('input');
+    //       input.placeholder = title;
+    //       column.footer().replaceChildren(input);
+
+    //       // Event listener for user input
+    //       input.addEventListener('keyup', () => {
+    //           if (column.search() !== this.value) {
+    //               column.search(input.value).draw();
+    //           }
+    //       });
+    //   });
+    // }
+  }).on('xhr.dt', (e, settings, json, xhr) => {
+    if (xhr.status === 200) {
+      json.recordsTotal = xhr.getResponseHeader('X-Total-Count');
+      json.recordsFiltered = xhr.getResponseHeader('X-Filtered-Count');
+    }
+  });
+
+  /**
+   * Handle overview data
+   * 
+   * @param {number} row
+   * @param {object} data
+   */
+  const handleOverviewData =  (row, data) => {
+    const photoProfile = data.photoProfile !== null ? `${data.photoProfile}?height=120&width=120` : '/public/assets/adminLTE-3.2.0/img/user1-128x128.jpg';
+    const backgroundImage = '/public/assets/adminLTE-3.2.0/img/photo1.png';
+    const html = `
+      <div class="card card-widget widget-user widget-user-modal elevation-3" style="border-radius: 1rem;">
+        <div class="widget-user-header widget-user-modal-header bg-info" style="background: url('${backgroundImage}') center center;">
+          <div class="row pt-2">
+            <div class="col-12">
+              <img src="/public/assets/images/x-button.png" class="float-right close"  data-dismiss="modal" aria-label="Close" />
+            </div>
+            <div class="col-12">
+              <h3 class="widget-user-username text-center">${data.fullName}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="widget-user-image">
+        <a href="${photoProfile}" data-fancybox data-caption="${data.fullName}">
+          <img class="img-circle rounded-circle elevation-2 mt-3" src="${photoProfile}" alt="User Avatar" style="height:100px;width:100px;">
+        </a>
+        </div>
+        <div class="card-body mt-4">
+          <dl class="row mt-4">
+          <dt class="col-12 col-sm-3">Full name</dt>
+            <dd class="col-12 col-sm-9">
+              ${data.fullName !== null ? data.fullName : '-'}
+            </dd>
+            <dt class="col-12 col-sm-3">Email</dt>
+            <dd class="col-12 col-sm-9">
+              ${data.email !== null ? data.email : '-'}
+            </dd>
+            <dt class="col-12 col-sm-3">Username</dt>
+            <dd class="col-12 col-sm-9">
+              ${data.username !== null ? data.username : '-'}
+            </dd>
+            <dt class="col-12 col-sm-3">Gender</dt>
+            <dd class="col-12 col-sm-9">
+              ${data.gender !== null ? ucfirst(data.gender) : '-'}
+            </dd>
+            <dt class="col-12 col-sm-3">Joined</dt>
+            <dd class="col-12 col-sm-9">
+              ${moment.tz(data.createdAt, getTimezone()).tz(moment.tz.guess()).format('dddd, DD MMMM YYYY, HH:mm')}
+            </dd>
+          </dl>
+          <hr>
+          <div class="row">
+            <div class="d-flex col-12 col-sm-4 justify-content-center">
+              <a class="btn btn-sm btn-danger" id="delete-user" row-id="${row}">Delete User</a>
+            </div>
+            <div class="d-flex col-12 col-sm-4 justify-content-center">
+              <a href="{{ adminRoute('/users/profile/${data.id}') }}" class="btn btn-sm btn-info">View Profile</a>
+            </div>
+            <div class="d-flex col-12 col-sm-4 justify-content-center">
+              <a href="{{ adminRoute('/users/profile/${data.id}/edit') }}" class="btn btn-sm btn-default">Edit Profile</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    const modal = `
+      <div class="modal fade col-12">
+        <div class="modal-dialog">
+          <div class="modal-content elevation-0" style="background-color: transparent; border: 0;">
+            <div class="modal-body">
+              ${html}
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // $(modal).modal('show');
+    $(modal).appendTo('body').modal('show');
+  }
+
+  /**
+   * Handle delete data
+   * 
+   * @param {number} row
+   * @param {object} data
+   * @param {boolean} inTrash
+   */
+  const handleDeleteData = (row, data, inTrash = false) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      html: `Delete user <b>${data.fullName}</b>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, do it!',
+      preConfirm: () => {
+        return $.ajax({
+          url: `/api/users/profile/${data.id}?in-trash=${inTrash}`,
+          type: 'DELETE',
+          success: () => true,
+          error: (xhr) => {
+            const error = xhr.responseJSON.message || xhr.statusText;
+            Swal.showValidationMessage(error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Something went wrong : ' + error
+            });
+          },
+        });
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        usersTable.draw(false);
+        SwalToast().fire({
+          icon: 'success',
+          html: `<b>${data.fullName}</b> deleted successfully`,
+        });
+
+        $('#deleted-user-count').text(
+          parseInt($('#deleted-user-count').text()) + 1,
+        );
+      }
+    });
+  }
+
+  /**
+   * Handle restore data
+   * 
+   * @param {number} row
+   * @param {object} data
+   */
+   const handleRestoreData = (row, data) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      html: `Restore user <b>${data.fullName}</b>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, do it!',
+      preConfirm: () => {
+        return $.ajax({
+          url: `/api/users/profile/${data.id}`,
+          type: 'PATCH',
+          success: () => true,
+          error: (xhr) => {
+            const error = xhr.responseJSON.message || xhr.statusText;
+            Swal.showValidationMessage(error);
+          },
+        });
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        usersTable.draw(false);
+        SwalToast().fire({
+          icon: 'success',
+          html: `<b>${data.fullName}</b> restored successfully`,
+        });
+      }
+    });
+  }
+});
+</script>
+{% endblock page_script %}

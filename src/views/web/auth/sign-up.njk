@@ -1,0 +1,142 @@
+{% extends "web/layout.njk" %}
+
+{% block page_title %}
+  Sign Up | {{ app_name }}
+{% endblock page_title %}
+
+{% block page_style %}
+<style type="text/css">
+@media (max-width: 768px) {
+  img.img-fluid {
+    max-height: 180px;
+    width: auto;
+  }
+}
+
+.responsive-img {
+  max-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .responsive-img {
+    max-height: 180px;
+  }
+}
+</style>
+{% endblock page_style %}
+
+{% block content %}
+<div class="content-wrapper">
+  <!-- Main content -->
+  <div class="content">
+    <div class="container">
+      <div class="row">
+        <!-- Image Placeholder -->
+        <div class="col-lg-6 d-flex align-items-center justify-content-center mt-5">
+          <img src="/public/assets/images/daba8948b31ce3ab0fae3d6cdeb2cbb2c1496100.png" alt="Welcome Image" class="img-fluid responsive-img">
+        </div>
+        
+        <!-- Login Form -->
+        <div class="col-lg-6 mt-4">
+          <div class="p-4 mt-4">
+            <h4>Registration</h4>
+            <form id="sign-up">
+              <div class="input-group mb-3">
+                <input id="fullName" type="text" class="form-control" placeholder="Full name">
+                <div class="input-group-append">
+                  <div class="input-group-text input-group-icon" style="max-width: 38px; justify-content: center; align-items: center;">
+                    <span class="fas fa-user-circle"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="input-group mb-3">
+                <input id="email" type="text" class="form-control" placeholder="Email">
+                <div class="input-group-append">
+                  <div class="input-group-text input-group-icon" style="max-width: 38px; justify-content: center; align-items: center;">
+                    <span class="fas fa-envelope"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="input-group mb-3">
+                <input id="username" type="text" class="form-control" placeholder="Username">
+                <div class="input-group-append">
+                  <div class="input-group-text input-group-icon" style="max-width: 38px; justify-content: center; align-items: center;">
+                    <span class="fas fa-at"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="input-group mb-3">
+                <input id="password" type="password" class="form-control" placeholder="Password" autocomplete="off">
+                <div class="input-group-append password-toggle" style="cursor: pointer;">
+                  <div class="input-group-text input-group-icon" style="max-width: 38px; justify-content: center; align-items: center;">
+                    <span class="fas fa-eye-slash"></span>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Register Now</button>
+            </form>
+
+            <p class="my-4 px-1">
+              <a href="{{ webRoute('/forgot-password') }}" class="float-left">Forgot password</a>
+              <a href="{{ webRoute('/sign-in') }}" class="float-right">Sign in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Main content -->
+</div>
+{% endblock content %}
+
+{% block page_script %}
+<script type="text/javascript" nonce="{{ nonce }}">
+jQuery(() => {
+  $('.password-toggle').on('click', function(e) {
+    e.preventDefault();
+    showHidePassword(this)
+  });
+
+  $('form#sign-up').on('submit', (e) => {
+    e.preventDefault();
+    $('input').removeClass('is-invalid');
+    $('.error.invalid-feedback').remove();
+
+    setFormDisabled(true);
+
+    const email = $('input#email').val();
+    const username = $('input#username').val();
+    const password = $('input#password').val();
+    const fullName = $('input#fullName').val()
+
+    $.ajax({
+      url: '/api/auth/sign-up',
+      method: 'POST',
+      data: { email, username, password, fullName },
+      success: (response) => {
+        setFormDisabled(false);
+        window.location.replace('{{ webRoute() }}');
+      },
+      error: (error) => {
+        setFormDisabled(false);
+        if (error.responseJSON?.statusCode === 400) {
+          error.responseJSON.data.map((item) => {
+            const inputElement = $(`input#${item.path}`);
+
+            inputElement.addClass('is-invalid');
+            inputElement.parent().append(`<span class="error invalid-feedback">${item.message}</span>`);
+            return true;
+          });
+        }
+
+        SwalToast().fire({
+          icon: 'error',
+          title: 'Registration failure',
+          text: error.responseJSON?.message || 'Please try again later',
+        });
+      }
+    });
+  });
+});
+</script>
+{% endblock page_script %}

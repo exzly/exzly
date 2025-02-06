@@ -1,0 +1,125 @@
+{% extends "web/layout.njk" %}
+
+{% block page_title %}
+  Sign In | {{ app_name }}
+{% endblock page_title %}
+
+{% block page_style %}
+<style type="text/css">
+@media (max-width: 768px) {
+  img.img-fluid {
+    max-height: 180px;
+    width: auto;
+  }
+}
+
+.responsive-img {
+  max-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .responsive-img {
+    max-height: 180px;
+  }
+}
+</style>
+{% endblock page_style %}
+
+{% block content %}
+<div class="content-wrapper">
+  <!-- Main content -->
+  <div class="content">
+    <div class="container">
+      <div class="row">
+        <!-- Image Placeholder -->
+        <div class="col-lg-6 d-flex justify-content-center mt-5">
+          <img src="/public/assets/images/e774ce160be36c24b29ebe7f33ec4b8ffe9da856.png" alt="Welcome Image" class="img-fluid responsive-img">
+        </div>
+        
+        <!-- Login Form -->
+        <div class="col-lg-6 mt-4">
+          <div class="p-4 mt-4">
+            <h4>Sign In</h4>
+            <form id="sign-in">
+              <div class="input-group mb-3">
+                <input id="identity" type="text" class="form-control" placeholder="Email / Username">
+                <div class="input-group-append">
+                  <div class="input-group-text input-group-icon" style="max-width: 38px; justify-content: center; align-items: center;">
+                    <span class="fas fa-user"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="input-group mb-3">
+                <input id="password" type="password" class="form-control" placeholder="Password" autocomplete="off">
+                <div class="input-group-append" style="cursor: pointer;" id="password-toggle">
+                  <div class="input-group-text input-group-icon" style="max-width: 38px; justify-content: center; align-items: center;">
+                    <span class="fas fa-eye-slash"></span>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+            </form>
+
+            <p class="my-4 px-1">
+              <a href="{{ webRoute('/sign-up') }}" class="float-left">Sign up</a>
+              <a href="{{ webRoute('/forgot-password') }}" class="float-right">Forgot password</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Main content -->
+</div>
+{% endblock content %}
+
+{% block page_script %}
+<script type="text/javascript" nonce="{{ nonce }}">
+jQuery(() => {
+  $('#password-toggle').on('click', function(e) {
+    e.preventDefault();
+    showHidePassword(this)
+  });
+
+  $('form#sign-in').on('submit', (e) => {
+    e.preventDefault();
+
+    setFormDisabled(true);
+    $('input').removeClass('is-invalid');
+    $('.error.invalid-feedback').remove();
+
+    const identity = $('input#identity').val();
+    const password = $('input#password').val();
+
+    $.ajax({
+      url: '/api/auth/sign-in',
+      method: 'POST',
+      data: { identity, password },
+      success: (response) => {
+        setFormDisabled(false);
+        localStorage.setItem('auth-token', response.token);
+        window.location.replace('{{ webRoute() }}');
+      },
+      error: (error) => {
+        setFormDisabled(false);
+        if (error.responseJSON?.statusCode === 400) {
+          error.responseJSON.data.map((item) => {
+            const inputElement = $(`input#${item.path}`);
+
+            inputElement.addClass('is-invalid');
+            inputElement.parent().append(`<span class="error invalid-feedback">${item.message}</span>`);
+            return true;
+          });
+        }
+
+        SwalToast().fire({
+          icon: 'error',
+          title: 'Authentication failure',
+          text: error.responseJSON?.message || 'Please try again later',
+        });
+      }
+    });
+  });
+})
+</script>
+{% endblock page_script %}

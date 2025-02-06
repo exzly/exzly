@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block page_title %}{% endblock page_title %}</title>
+  {# <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"> #}
+  <link rel="stylesheet" href="/public/assets/adminLTE-3.2.0/plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="/public/assets/adminLTE-3.2.0/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <link rel="stylesheet" href="/public/assets/adminLTE-3.2.0/css/adminlte.min.css">
+  <link rel="stylesheet" href="/public/assets/sweetalert2/sweetalert2.min.css">
+  <link rel="apple-touch-icon" sizes="57x57" href="/public/assets/images/brand/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/public/assets/images/brand/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/public/assets/images/brand/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/public/assets/images/brand/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/public/assets/images/brand/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/public/assets/images/brand/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/public/assets/images/brand/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/public/assets/images/brand/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/public/assets/images/brand/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/public/assets/images/brand/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/assets/images/brand/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/public/assets/images/brand/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/public/assets/images/brand/favicon-16x16.png">
+  <link rel="icon" href="/public/assets/images/brand/favicon.ico" type="image/x-icon">
+  <link rel="manifest" href="/public/manifest.json">
+  <meta name="msapplication-config" content="/public/browserconfig.xml">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/public/assets/images/brand/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+  <style type="text/css">
+    .dt-search {
+      display: flex;
+      align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .dt-search label {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  
+  .dt-search input[type="search"] {
+    flex-grow: 1;
+    font-size: 0.875rem;
+    padding: 5px;
+    height: auto;
+  }
+
+  .dt-paging {
+    float: right;
+  }
+
+  .no-hover:hover {
+    background-color: inherit !important;
+    color: inherit !important;
+  }
+
+  .widget-user-modal .widget-user-modal-header {
+    border-radius: 1rem;
+    height: 148px;
+    padding: 0;
+    padding-left: 1em;
+    padding-right: 1em;
+    text-align: center;
+  }
+  </style>
+  {% block page_style %}{% endblock page_style %}
+</head>
+<body class="hold-transition sidebar-mini">
+  <div class="wrapper">
+    {% include "admin/components/navbar.njk" %}
+    {% include "admin/components/sidebar-left.njk" %}
+    {% block content %}{% endblock content %}
+    {% include "admin/components/sidebar-right.njk" %}
+
+    <footer class="main-footer">
+      <div class="float-right d-none d-sm-inline">
+        version : {{ version }}
+      </div>
+      <strong>Copyright &copy; {{ moment().year() }} <a href="https://www.linkedin.com/in/agoenks29D">Agung Dirgantara</a>.</strong> All rights reserved.
+    </footer>
+  </div>
+</body>
+<script src="/public/assets/adminLTE-3.2.0/plugins/jquery/jquery.min.js"></script>
+<script src="/public/assets/adminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/public/assets/adminLTE-3.2.0/js/adminlte.min.js"></script>
+<script src="/public/assets/sweetalert2/sweetalert2.min.js"></script>
+<script src="/public/assets/moment/moment.min.js"></script>
+<script src="/public/assets/moment/moment-timezone-with-data.min.js"></script>
+<script src="/public/global.js"></script>
+<script src="/public/admin/app.js"></script>
+{% block page_script %}{% endblock page_script %}
+</html>

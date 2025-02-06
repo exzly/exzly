@@ -1,0 +1,57 @@
+{% extends "web/layout.njk" %}
+
+{% block page_title %}
+  {{ httpErrors(error.statusCode).message }} | {{ app_name }}
+{% endblock page_title %}
+
+{% block content %}
+<div class="content-wrapper">
+  <!-- Content header -->
+  <div class="content-header">
+    <div class="container">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"> {{ error.statusCode }} <small>{{ httpErrors(error.statusCode).message }}</small></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{{ webRoute() }}">Home</a></li>
+            <li class="breadcrumb-item active">{{ error.statusCode ~ ' ' ~ httpErrors(error.statusCode).message }}</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Content header -->
+
+  <!-- Main content -->
+  <div class="content">
+    <div class="container">
+      <div class="error-page">
+        <h2 class="headline text-warning"> {{ error.statusCode }}</h2>
+        <div class="error-content">
+          <h3><i class="fas fa-exclamation-triangle text-warning"></i> Oops! {{ httpErrors(error.statusCode).message }}.</h3>
+          <p>
+            We will work on fixing that right away. 
+            Meanwhile, you may <a href="{{ webRoute() }}">return to home page</a> or try using the search form.
+          </p>
+
+          {% if httpErrors(error.statusCode).message !== error.message %}
+            <code><p>{{ error.message }}</p></code>
+          {% endif %}
+
+          <form class="search-form">
+            <div class="input-group">
+              <input type="text" name="search" class="form-control" placeholder="Search">
+              <div class="input-group-append">
+                <button type="submit" name="submit" class="btn btn-warning"><i class="fas fa-search"></i></button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Main content -->
+</div>
+{% endblock content %}

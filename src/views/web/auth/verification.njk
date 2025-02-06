@@ -1,0 +1,92 @@
+{% extends "web/layout.njk" %}
+
+{% block page_title %}
+  Verification | {{ app_name }}
+{% endblock page_title %}
+
+{% block content %}
+<div class="content-wrapper">
+  <!-- Main content -->
+  <div class="content">
+    <div class="container">
+      <div class="row">
+        <!-- Image Placeholder -->
+        <div class="col-lg-6 d-flex align-items-center justify-content-center mt-5">
+          <img src="/public/assets/images/21607758fa4e113d1f26a991e83ee86b649852fc.png" alt="Welcome Image" class="img-fluid" style="max-height: 480px;">
+        </div>
+
+        <!-- Login Form -->
+        <div class="col-lg-6 mt-4">
+          <div class="p-4 mt-4">
+            {% if isExpired %}
+            <h4 class="text-center">Expired</h4>
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rerum aliquam eveniet eligendi sequi blanditiis itaque delectus veniam reiciendis labore, rem magni modi repellendus. Sapiente, placeat vero neque consequuntur numquam doloribus!</p>
+            {% else %}
+            <form id="verification">
+              <div class="form-group">
+                <label for="code">Verification Code</label>
+                <input type="text" name="code" class="form-control" id="code" placeholder="Enter code">
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Verify</button>
+            </form>
+
+            <p class="my-4 px-1">
+              <a href="{{ webRoute('/sign-in') }}" class="float-left">Sign in</a>
+              <a href="{{ webRoute('/sign-up') }}" class="float-right">Sign up</a>
+            </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ./Main content -->
+</div>
+{% endblock content %}
+
+{% block page_script %}
+<script type="text/javascript" nonce="{{ nonce }}">
+jQuery(()=>{
+  $('form#verification').on('submit', (e) => {
+    e.preventDefault();
+
+    setFormDisabled(true);
+    $('input').removeClass('is-invalid');
+    $('.error.invalid-feedback').remove();
+
+    const code = $('input#code').val();
+
+    $.ajax({
+      url: '/api/auth/verification',
+      method: 'POST',
+      data: { code },
+      success: (response) => {
+        setFormDisabled(false);
+        if (response.purpose === 'password-reset') {
+          window.location.replace('{{ webRoute("/reset-password") }}');
+          localStorage.setItem('reset-password-token', response.token);
+        }
+      },
+      error: (error) => {
+        setFormDisabled(false);
+        if (error.responseJSON?.statusCode === 400) {
+          error.responseJSON.data?.map((item) => {
+            const inputElement = $(`input#${item.path}`);
+
+            inputElement.addClass('is-invalid');
+            inputElement.parent().append(`<span class="error invalid-feedback">${item.message}</span>`);
+            return true;
+          });
+        }
+
+        SwalToast().fire({
+          icon: 'error',
+          title: 'Verification failure',
+          text: error.responseJSON?.message || 'Please try again later',
+        });
+      }
+    });
+  });
+});
+</script>
+{% endblock page_script %}
