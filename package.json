@@ -37,7 +37,7 @@
     "@exzly-validators": "./src/validators"
   },
   "dependencies": {
-    "chokidar": "^3.6.0",
+    "chokidar": "^4.0.3",
     "cli-table3": "^0.6.5",
     "compression": "^1.7.5",
     "cors": "^2.8.5",
