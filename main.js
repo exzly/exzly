@@ -11,9 +11,9 @@ let server;
 const { sequelize } = require('@exzly-models');
 const routes = require('./src/routes');
 
-if (process.env.ENABLE_SSL === 'true') {
-  const key = fs.readSync(process.env.SSL_KEY_FILE);
-  const cert = fs.readSync(process.env.SSL_CERT_FILE);
+if (process.env.ENABLE_HTTPS === 'true') {
+  const key = fs.readFileSync(process.env.SSL_KEY_FILE);
+  const cert = fs.readFileSync(process.env.SSL_CERT_FILE);
   server = https.createServer({ key, cert }, routes);
 } else {
   server = http.createServer(routes);
