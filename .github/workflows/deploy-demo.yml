@@ -62,21 +62,21 @@ jobs:
         uses: jossef/action-set-json-field@v2.2
         with:
           file: 'database/config.json'
-          field: '${{ secrets.NODE_ENV }}.database'
+          field: 'production.database'
           value: ${{ secrets.DB_NAME }}
 
       - name: 'Database config: database username'
         uses: jossef/action-set-json-field@v2.2
         with:
           file: 'database/config.json'
-          field: '${{ secrets.NODE_ENV }}.username'
+          field: 'production.username'
           value: ${{ secrets.DB_USERNAME }}
 
       - name: 'Database config: database password'
         uses: jossef/action-set-json-field@v2.2
         with:
           file: 'database/config.json'
-          field: '${{ secrets.NODE_ENV }}.password'
+          field: 'production.password'
           value: ${{ secrets.DB_PASSWORD }}
 
       - name: Print contents of .env file
@@ -87,4 +87,4 @@ jobs:
 
       - name: Reload pm2
         run: cd /home/central/actions-runner/_work/exzly/exzly
-      - run: pm2 reload live-engine
+      - run: pm2 reload exzly
