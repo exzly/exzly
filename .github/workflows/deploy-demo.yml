@@ -1,0 +1,90 @@
+name: Deployment for Demo
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted, staging-runner]
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create env file
+        run: |
+          echo "TZ = ${{ vars.TZ }}" >> .env
+          echo "PORT = ${{ secrets.PORT }}" >> .env
+          echo "APP_NAME = ${{ vars.APP_NAME }}" >> .env
+          echo "NODE_ENV = ${{ vars.NODE_ENV }}" >> .env
+          echo "STORAGE_PATH = ${{ secrets.STORAGE_PATH }}" >> .env
+          echo "SESSION_SECRET = ${{ secrets.SESSION_SECRET }}" >> .env
+          echo "SESSION_EXPIRATION = ${{ secrets.SESSION_EXPIRATION }}" >> .env
+
+          # JWT
+          echo "JWT_SECRET = ${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_EXPIRATION = ${{ secrets.JWT_EXPIRATION }}" >> .env
+
+          # HTTPS
+          echo "ENABLE_HTTPS = ${{ vars.ENABLE_HTTPS }}" >> .env
+          echo "SSL_KEY_FILE = ${{ secrets.SSL_KEY_FILE }}" >> .env
+          echo "SSL_CERT_FILE = ${{ secrets.SSL_CERT_FILE }}" >> .env
+
+          # Database
+          echo "DB_SYNC = ${{ vars.DB_SYNC }}" >> .env
+          echo "DB_MODE = ${{ vars.DB_MODE }}" >> .env
+
+          # Security: JWT
+          echo "JWT_SECRET = ${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_EXPIRATION = ${{ secrets.JWT_EXPIRATION }}" >> .env
+
+          # Routes
+          echo "WEB_ROUTE = ${{ secrets.WEB_ROUTE }}" >> .env
+          echo "API_ROUTE = ${{ secrets.API_ROUTE }}" >> .env
+          echo "ADMIN_ROUTE = ${{ secrets.ADMIN_ROUTE }}" >> .env
+        working-directory: ${{ github.workspace }}
+
+      - name: 'Database config: database name'
+        uses: jossef/action-set-json-field@v2.2
+        with:
+          file: 'database/config.json'
+          field: '${{ secrets.NODE_ENV }}.database'
+          value: ${{ secrets.DB_NAME }}
+
+      - name: 'Database config: database username'
+        uses: jossef/action-set-json-field@v2.2
+        with:
+          file: 'database/config.json'
+          field: '${{ secrets.NODE_ENV }}.username'
+          value: ${{ secrets.DB_USERNAME }}
+
+      - name: 'Database config: database password'
+        uses: jossef/action-set-json-field@v2.2
+        with:
+          file: 'database/config.json'
+          field: '${{ secrets.NODE_ENV }}.password'
+          value: ${{ secrets.DB_PASSWORD }}
+
+      - name: Print contents of .env file
+        run: cat .env
+
+      - name: Install PM2
+        run: npm install -g pm2
+
+      - name: Reload pm2
+        run: cd /home/central/actions-runner/_work/exzly/exzly
+      - run: pm2 reload live-engine
