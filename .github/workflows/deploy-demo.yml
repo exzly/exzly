@@ -35,10 +35,6 @@ jobs:
           echo "SESSION_SECRET = ${{ secrets.SESSION_SECRET }}" >> .env
           echo "SESSION_EXPIRATION = ${{ secrets.SESSION_EXPIRATION }}" >> .env
 
-          # JWT
-          echo "JWT_SECRET = ${{ secrets.JWT_SECRET }}" >> .env
-          echo "JWT_EXPIRATION = ${{ secrets.JWT_EXPIRATION }}" >> .env
-
           # HTTPS
           echo "ENABLE_HTTPS = ${{ vars.ENABLE_HTTPS }}" >> .env
           echo "SSL_KEY_FILE = ${{ secrets.SSL_KEY_FILE }}" >> .env
