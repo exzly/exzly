@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, staging-runner]
+    runs-on: [self-hosted, staging, staging-runner]
 
     strategy:
       matrix:
