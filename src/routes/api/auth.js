@@ -108,6 +108,7 @@ app.post(
     // create session
     if (req.session) {
       req.session.userId = auth.id;
+      req.session.save();
     }
 
     // send response

@@ -24,7 +24,7 @@ const rateLimit = {
    *
    * @type {number}
    */
-  maxSignUpAttempts: 40, // default: 6 times
+  maxSignUpAttempts: 20, // default: 20 times
 
   /**
    * Duration for the sign-up rate limit.
