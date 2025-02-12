@@ -45,7 +45,7 @@ helmetMiddleware.unless = unless;
  */
 app.set('trust proxy', process.env.TRUST_PROXY);
 app.set('view engine', 'njk');
-app.use(sessionMiddleware, viewEngineMiddleware);
+app.use(sessionMiddleware, viewEngineMiddleware(app));
 
 /**
  * Global middleware
