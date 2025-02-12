@@ -31,6 +31,7 @@ jobs:
           echo "PORT = ${{ secrets.PORT }}" >> .env
           echo "APP_NAME = ${{ vars.APP_NAME }}" >> .env
           echo "NODE_ENV = ${{ vars.NODE_ENV }}" >> .env
+          echo "TRUST_PROXY = ${{ secrets.TRUST_PROXY }}" >> .env
           echo "STORAGE_PATH = ${{ secrets.STORAGE_PATH }}" >> .env
           echo "SESSION_SECRET = ${{ secrets.SESSION_SECRET }}" >> .env
           echo "SESSION_EXPIRATION = ${{ secrets.SESSION_EXPIRATION }}" >> .env

@@ -3,7 +3,7 @@ const express = require('express');
 const { Op } = require('sequelize');
 const httpErrors = require('http-errors');
 const PDFMake = require('pdfmake');
-const { authMiddleware, setRouteName, sessionMiddleware } = require('@exzly-middlewares');
+const { authMiddleware, setRouteName } = require('@exzly-middlewares');
 const { UserModel } = require('@exzly-models');
 
 const app = express.Router();
@@ -11,23 +11,18 @@ const app = express.Router();
 /**
  * Admin middleware
  */
-app.use(
-  setRouteName('admin'),
-  sessionMiddleware,
-  authMiddleware.getAuthorization,
-  (req, res, next) => {
-    const whitelist = /(sign-(in)|(forgot|reset)-password|verification)/;
-    const regexPath = whitelist.test(req.path);
+app.use(setRouteName('admin'), authMiddleware.getAuthorization, (req, res, next) => {
+  const whitelist = /(sign-(in)|(forgot|reset)-password|verification)/;
+  const regexPath = whitelist.test(req.path);
 
-    if (req.user && regexPath) {
-      return res.redirect(`${process.env.ADMIN_ROUTE}`);
-    } else if (!req.user && !regexPath) {
-      return res.redirect(`${process.env.ADMIN_ROUTE}/sign-in`);
-    }
+  if (req.user && regexPath) {
+    return res.redirect(`${process.env.ADMIN_ROUTE}`);
+  } else if (!req.user && !regexPath) {
+    return res.redirect(`${process.env.ADMIN_ROUTE}/sign-in`);
+  }
 
-    return next();
-  },
-);
+  return next();
+});
 
 app.use(authMiddleware.rejectNonAdmin);
 

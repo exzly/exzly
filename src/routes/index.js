@@ -5,7 +5,11 @@ const express = require('express');
 const httpErrors = require('http-errors');
 const compression = require('compression');
 const { unless } = require('express-unless');
-const { viewEngineMiddleware, fileLoaderMiddleware } = require('@exzly-middlewares');
+const {
+  viewEngineMiddleware,
+  fileLoaderMiddleware,
+  sessionMiddleware,
+} = require('@exzly-middlewares');
 const apiRoutes = require('./api');
 const webRoutes = require('./web');
 const adminRoutes = require('./admin');
@@ -39,9 +43,9 @@ helmetMiddleware.unless = unless;
 /**
  * Set view engine & proxy
  */
-app.set('trust proxy', false);
+app.set('trust proxy', process.env.TRUST_PROXY);
 app.set('view engine', 'njk');
-app.use(viewEngineMiddleware);
+app.use(sessionMiddleware, viewEngineMiddleware);
 
 /**
  * Global middleware

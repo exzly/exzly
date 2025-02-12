@@ -2,7 +2,7 @@ const ms = require('ms');
 const express = require('express');
 const httpErrors = require('http-errors');
 const { securityConfig } = require('@exzly-config');
-const { authMiddleware, setRouteName, sessionMiddleware } = require('@exzly-middlewares');
+const { authMiddleware, setRouteName } = require('@exzly-middlewares');
 const { AuthVerifyModel, UserModel } = require('@exzly-models');
 const { jwtHelper } = require('@exzly-helpers');
 const { createRoute } = require('@exzly-utils');
@@ -12,26 +12,21 @@ const app = express.Router();
 /**
  * Web middleware
  */
-app.use(
-  setRouteName('web'),
-  sessionMiddleware,
-  authMiddleware.getAuthorization,
-  (req, res, next) => {
-    const skiplist = `${process.env.API_ROUTE}/auth/(sign-(up|in)|(forgot|reset)-password|verification)`;
-    const whitelist = /(sign-(up|in)|(forgot|reset)-password|verification)/;
-    const regexPath = whitelist.test(req.path);
+app.use(setRouteName('web'), authMiddleware.getAuthorization, (req, res, next) => {
+  const skiplist = `${process.env.API_ROUTE}/auth/(sign-(up|in)|(forgot|reset)-password|verification)`;
+  const whitelist = /(sign-(up|in)|(forgot|reset)-password|verification)/;
+  const regexPath = whitelist.test(req.path);
 
-    if (req.user && regexPath) {
-      const skip = new RegExp(skiplist);
+  if (req.user && regexPath) {
+    const skip = new RegExp(skiplist);
 
-      if (!skip.exec(req.path)) {
-        return res.redirect(createRoute('web'));
-      }
+    if (!skip.exec(req.path)) {
+      return res.redirect(createRoute('web'));
     }
+  }
 
-    return next();
-  },
-);
+  return next();
+});
 
 /**
  * Home page
