@@ -20,14 +20,15 @@ const { getPackageJSON, createRoute } = require('@exzly-utils');
  * @returns {ExpressMiddleware}
  */
 module.exports = (express) => {
+  const viewEngine = nunjucks.configure('src/views', {
+    autoescape: false,
+    express,
+    watch: true,
+    noCache: true,
+  });
+
   return (req, res, next) => {
     res.locals.nonce = crypto.randomBytes(16).toString('base64');
-    const viewEngine = nunjucks.configure('src/views', {
-      autoescape: false,
-      express,
-      watch: true,
-    });
-
     /**
      * Custom function
      */

@@ -51,9 +51,8 @@ const sessionMiddleware = session({
     path: '/',
     maxAge: ms(process.env.SESSION_EXPIRATION),
     sameSite: 'lax',
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    signed: true,
+    httpOnly: false,
+    secure: false,
   },
 });
 
