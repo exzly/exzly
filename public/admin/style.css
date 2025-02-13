@@ -1,0 +1,36 @@
+.dt-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.dt-search label {
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.dt-search input[type="search"] {
+  flex-grow: 1;
+  font-size: 0.875rem;
+  padding: 5px;
+  height: auto;
+}
+
+.dt-paging {
+  float: right;
+}
+
+.no-hover:hover {
+  background-color: inherit !important;
+  color: inherit !important;
+}
+
+.widget-user-modal .widget-user-modal-header {
+  border-radius: 1rem;
+  height: 148px;
+  padding: 0;
+  padding-left: 1em;
+  padding-right: 1em;
+  text-align: center;
+}

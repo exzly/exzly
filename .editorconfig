@@ -9,6 +9,12 @@ root = true
 charset = utf-8
 end_of_line = lf
 
+# CSS files
+[*.{css}]
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+
 # Javascript / Typescript files
 [*.{js,ts}]
 indent_size = 2
