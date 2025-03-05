@@ -1,4 +1,4 @@
-name: Deployment for Demo
+name: Deployment Test
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -25,12 +25,22 @@ jobs:
       - name: Install dependencies
         run: npm install --include=optional sharp
 
+      - name: Set up MySQL using Docker
+        run: docker run --name mysql-test -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=exzly -p 3306:3306 -d mysql:8
+
+      - name: Wait for MySQL to be ready
+        run: |
+          until docker exec mysql-test mysqladmin --user=root --password=password --host=127.0.0.1 --port=3306 ping --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 5
+          done
+
       - name: Create env file
         run: |
           echo "TZ = ${{ vars.TZ }}" >> .env
           echo "PORT = ${{ secrets.PORT }}" >> .env
           echo "APP_NAME = ${{ vars.APP_NAME }}" >> .env
-          echo "NODE_ENV = ${{ vars.NODE_ENV }}" >> .env
+          echo "NODE_ENV = test" >> .env
           echo "TRUST_PROXY = ${{ secrets.TRUST_PROXY }}" >> .env
           echo "STORAGE_PATH = ${{ secrets.STORAGE_PATH }}" >> .env
           echo "SESSION_SECRET = ${{ secrets.SESSION_SECRET }}" >> .env
@@ -66,29 +76,45 @@ jobs:
         uses: jossef/action-set-json-field@v2.2
         with:
           file: 'database/config.json'
-          field: 'production.database'
-          value: ${{ secrets.DB_NAME }}
+          field: 'test.database'
+          value: 'exzly'
 
       - name: 'Database config: database username'
         uses: jossef/action-set-json-field@v2.2
         with:
           file: 'database/config.json'
-          field: 'production.username'
-          value: ${{ secrets.DB_USERNAME }}
+          field: 'test.username'
+          value: 'root'
 
       - name: 'Database config: database password'
         uses: jossef/action-set-json-field@v2.2
         with:
           file: 'database/config.json'
-          field: 'production.password'
-          value: ${{ secrets.DB_PASSWORD }}
+          field: 'test.password'
+          value: 'password'
 
-      - name: Print contents of .env file
-        run: cat .env
+      - name: Test MySQL Connection
+        run: |
+          node -e "
+            const mysql = require('mysql'); 
+            const connection = mysql.createConnection({
+              host: '127.0.0.1', 
+              user: 'root', 
+              password: 'password', 
+              database: 'exzly'
+            });
+            connection.connect((err) => {
+              if (err) {
+                console.error('Error connecting to the database:', err);
+                process.exit(1);
+              } else {
+                console.log('Database connected successfully!');
+              }
+            });
+          "
 
-      - name: Install PM2
-        run: npm install -g pm2
+      - name: Start application
+        run: npm start
 
-      - name: Reload pm2
-        run: cd /home/central/actions-runner/_work/exzly/exzly
-      - run: pm2 reload exzly
+      - name: Stop MySQL container
+        run: docker stop mysql-test && docker rm mysql-test
