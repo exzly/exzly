@@ -55,7 +55,7 @@
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "mailtrap": "^3.4.0",
+    "mailtrap": "^4.0.0",
     "mime": "^3.0.0",
     "module-alias": "^2.2.3",
     "moment": "^2.30.1",
