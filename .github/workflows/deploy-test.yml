@@ -99,13 +99,14 @@ jobs:
       - name: Test MySQL Connection
         run: |
           node -e "
-            const mysql = require('mysql'); 
+            const mysql = require('mysql2'); // menggunakan mysql2
             const connection = mysql.createConnection({
-              host: '127.0.0.1', 
-              user: 'root', 
-              password: 'password', 
+              host: '127.0.0.1',
+              user: 'root',
+              password: 'password',
               database: 'exzly'
             });
+
             connection.connect((err) => {
               if (err) {
                 console.error('Error connecting to the database:', err);
