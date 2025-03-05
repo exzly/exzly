@@ -93,6 +93,9 @@ jobs:
           field: 'test.password'
           value: 'password'
 
+      - name: 'Database config: database password'
+        run: npm install mysql
+
       - name: Test MySQL Connection
         run: |
           node -e "
