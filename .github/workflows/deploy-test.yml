@@ -118,8 +118,18 @@ jobs:
             });
           "
 
-      - name: Start application
-        run: npm start
+      - name: Start application in the background
+        run: |
+          nohup npm start &
+          echo $! > npm.pid
+
+      - name: Wait for application to start
+        run: |
+          sleep 10
+
+      - name: Stop application
+        run: |
+          kill $(cat npm.pid)
 
       - name: Stop MySQL container
         run: docker stop mysql-test && docker rm mysql-test
