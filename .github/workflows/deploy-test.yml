@@ -72,6 +72,9 @@ jobs:
           echo "ADMIN_ROUTE = ${{ secrets.ADMIN_ROUTE }}" >> .env
         working-directory: ${{ github.workspace }}
 
+      - name: Read .env file
+        run: cat .env
+
       - name: 'Database config: database name'
         uses: jossef/action-set-json-field@v2.2
         with:
